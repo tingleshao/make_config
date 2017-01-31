@@ -6,6 +6,32 @@ def parse(opencv_out, filename):
     # takes the <opencv_out> file as a string, parse it into a JSON file,
     # and write it into file with <filename>
 
+    with open(opencv_out, 'r') as inputfile:
+        data = inputfile.read()
+
+    tempstr = data.split("Camera #")
+    tempstr = tempstr[1:]
+    ks = []
+    rs = []
+    for i in xrange(len(tempstr)-1):
+        curr_tempstr = tempstr[i]
+        curr_kstr = curr_tempstr.split("K:")[1].split("R:")[0]
+        curr_kstr = curr_kstr.replace('\n','').replace('[','').replace(']','').replace(';',',').split(', ')
+        curr_rstr = curr_tempstr.split("K:")[1].split("R:")[1]
+        curr_rstr = curr_rstr.replace('\n','').replace('[','').replace(']','').replace(';',',').split(', ')
+        curr_k = [float(i) for i in curr_kstr]
+        curr_r = [float(i) for i in curr_rstr]
+        ks.append(curr_k)
+        rs.append(curr_r)
+
+    curr_tempstr = tempstr[i]
+    curr_kstr = curr_tempstr.split("K:")[1].split("R:")[0]
+    curr_kstr = curr_kstr.replace('\n','').replace('[','').replace(']','').replace(';',',').split(', ')
+    curr_rstr = curr_tempstr.split("K:")[1].split("R:")[1].split('Warping images')[0]
+    curr_rstr = curr_rstr.replace('\n','').replace('[','').replace(']','').replace(';',',').split(', ')
+    curr_k = [float(i) for i in curr_kstr]
+    curr_r = [float(i) for i in curr_rstr]
+
     x = 0
     yaw = []
     pitch = []
@@ -16,7 +42,9 @@ def parse(opencv_out, filename):
     f = []
     s = []
 
-    #TODO: expand the string to fill in these lists 
+
+
+    #TODO: expand the string to fill in these lists
 
     with open("reference.json") as json_File:
         json_data = json.load(json_file, object_pairs_hook = OrderedDict)
