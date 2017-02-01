@@ -31,20 +31,33 @@ def parse(opencv_out, filename):
     curr_rstr = curr_rstr.replace('\n','').replace('[','').replace(']','').replace(';',',').split(', ')
     curr_k = [float(i) for i in curr_kstr]
     curr_r = [float(i) for i in curr_rstr]
+    ks.append(curr_k)
+    rs.append(curr_r)
 
-    x = 0
-    yaw = []
-    pitch = []
-    roll = []
+    # now we have k matrices and r matrices
+    # comments are the first guesses of the angles' meanings
+    yaw = []  # x
+    pitch = [] # y
+    roll = [] # z
     k1 = []
     offsetx = []
     offsety = []
     f = []
-    s = []
+    # s = []
 
-
-
-    #TODO: expand the string to fill in these lists
+    for i in xrange(len(ks)):
+        curr_k = ks[i]
+        curr_r = rs[i]
+        R = list_to_numpy_array(curr_r)
+        K = list_to_numpy_array(curr_k)
+        x,y,z = rotation_matrix_to_euler_angles(R)
+        yaw.append(x*180.0/math.pi)
+        pitch.append(y*180.0/math.pi)
+        roll.append(z*180.0/math.pi)
+        offsetx.append(xxx)
+        offsety.append(xxx)
+        k1.append(xxx)
+        f.append(xxx)
 
     with open("reference.json") as json_File:
         json_data = json.load(json_file, object_pairs_hook = OrderedDict)
@@ -75,6 +88,37 @@ def parse(opencv_out, filename):
         print data
         print "wrote above data to " + filename
 
+
+def list_to_numpy_array(R):
+    new_lst = []
+    for i in xrange(3):
+        new_lst.append([R[i*3+j] for j in xrange(3)])
+    return np.array(new_lst)
+
+
+def is_rotation_matrix(R):
+    #input R matrix should be numpy array
+    Rt = np.transpose(R)
+    isIdentity = np.dot(Rt, R)
+    I = np.identity(3, dtype=R.dtype)
+    n = np.linalg.norm(I - isIdentity)
+    return n < 1e-6
+
+
+def rotation_matrix_to_euler_angles(R):
+    # input R matrix should be numpy array
+    assert(is_rotation_matrix(R))
+    sy = math.sqrt(R[0,0] * R[0,0] + R[1,0] * R[1,0])
+    singular = sy < 1e-6
+    if not singular:
+        x = math.atan2(R[2,1], R[2,2])
+        y = math.atan2(-R[2,0], sy)
+        z = math.atan2(R[1,0], R[0,0])
+    else:
+        x = math.atan2(-R[1,2], R[1,1])
+        y = math.atan2(-R[2,0], sy)
+        z = 0
+    return np.array([x,y,z])
 
 
 if __name__ == "__main__":
