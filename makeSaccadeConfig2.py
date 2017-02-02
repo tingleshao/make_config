@@ -1,5 +1,9 @@
-
-
+import json
+import sys
+import math
+import os
+import numpy as np
+from collections import OrderedDict
 
 
 def parse(opencv_out, filename):
@@ -24,7 +28,7 @@ def parse(opencv_out, filename):
         ks.append(curr_k)
         rs.append(curr_r)
 
-    curr_tempstr = tempstr[i]
+    curr_tempstr = tempstr[-1]
     curr_kstr = curr_tempstr.split("K:")[1].split("R:")[0]
     curr_kstr = curr_kstr.replace('\n','').replace('[','').replace(']','').replace(';',',').split(', ')
     curr_rstr = curr_tempstr.split("K:")[1].split("R:")[1].split('Warping images')[0]
@@ -43,7 +47,7 @@ def parse(opencv_out, filename):
     offsetx = []
     offsety = []
     f = []
-    # s = []
+    s = []
 
     for i in xrange(len(ks)):
         curr_k = ks[i]
@@ -54,12 +58,13 @@ def parse(opencv_out, filename):
         yaw.append(x*180.0/math.pi)
         pitch.append(y*180.0/math.pi)
         roll.append(z*180.0/math.pi)
-        offsetx.append(xxx)
-        offsety.append(xxx)
-        k1.append(xxx)
-        f.append(xxx)
+        offsetx.append(0)
+        offsety.append(9)
+        k1.append(1)
+        f.append(2)
+        s.append(3)
 
-    with open("reference.json") as json_File:
+    with open("reference.json") as json_file:
         json_data = json.load(json_file, object_pairs_hook = OrderedDict)
 
     poly = [[0]] * 10
@@ -67,13 +72,15 @@ def parse(opencv_out, filename):
     poly.insert(0, alist)
 
     for key in json_data.keys():
-        for key2 inf json_data[key]:
+        for key2 in json_data[key]:
             if key2 == "global":
                 json_data[key][key2]['vig_poly_red'] = poly
                 json_data[key][key2]['vig_poly_green'] = poly
                 json_data[key][key2]['vig_poly_blue'] = poly
-                json_data[key][key2]['sensorwidth'] = im.size[0]
-                json_data[key][key2]['sensorheight'] = im.size[1]
+    #            json_data[key][key2]['sensorwidth'] = im.size[0]
+    #            json_data[key][key2]['sensorheight'] = im.size[1]
+                json_data[key][key2]['sensorwidth'] = 1080
+                json_data[key][key2]['sensorheight'] = 760
                 json_data[key][key2]['pixel_size'] = .0014
                 json_data[key][key2]['focal_length'] = 35
             if key2 == "microcameras":
@@ -106,7 +113,7 @@ def is_rotation_matrix(R):
 
 
 def rotation_matrix_to_euler_angles(R):
-    # input R matrix should be numpy array
+    # input R matrix should be numpy array    #TODO: expand the string to fill in these lists
     assert(is_rotation_matrix(R))
     sy = math.sqrt(R[0,0] * R[0,0] + R[1,0] * R[1,0])
     singular = sy < 1e-6
