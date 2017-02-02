@@ -17,8 +17,10 @@ def parse(opencv_out, filename):
     tempstr = tempstr[1:]
     ks = []
     rs = []
+    s = []
     for i in xrange(len(tempstr)-1):
         curr_tempstr = tempstr[i]
+        slot_num = int(curr_tempstr.split("K:")[0].split(":")[0])
         curr_kstr = curr_tempstr.split("K:")[1].split("R:")[0]
         curr_kstr = curr_kstr.replace('\n','').replace('[','').replace(']','').replace(';',',').split(', ')
         curr_rstr = curr_tempstr.split("K:")[1].split("R:")[1]
@@ -27,8 +29,10 @@ def parse(opencv_out, filename):
         curr_r = [float(i) for i in curr_rstr]
         ks.append(curr_k)
         rs.append(curr_r)
+        s.append(slot_num)
 
     curr_tempstr = tempstr[-1]
+    slot_num = int(curr_tempstr.split("K:")[0].split(":")[0])
     curr_kstr = curr_tempstr.split("K:")[1].split("R:")[0]
     curr_kstr = curr_kstr.replace('\n','').replace('[','').replace(']','').replace(';',',').split(', ')
     curr_rstr = curr_tempstr.split("K:")[1].split("R:")[1].split('Warping images')[0]
@@ -37,6 +41,7 @@ def parse(opencv_out, filename):
     curr_r = [float(i) for i in curr_rstr]
     ks.append(curr_k)
     rs.append(curr_r)
+    s.append(slot_num)
 
     # now we have k matrices and r matrices
     # comments are the first guesses of the angles' meanings
@@ -47,7 +52,6 @@ def parse(opencv_out, filename):
     offsetx = []
     offsety = []
     f = []
-    s = []
 
     for i in xrange(len(ks)):
         curr_k = ks[i]
@@ -62,7 +66,7 @@ def parse(opencv_out, filename):
         offsety.append(9)
         k1.append(1)
         f.append(2)
-        s.append(3)
+        #s.append(3)
 
     with open("reference.json") as json_file:
         json_data = json.load(json_file, object_pairs_hook = OrderedDict)
@@ -79,8 +83,8 @@ def parse(opencv_out, filename):
                 json_data[key][key2]['vig_poly_blue'] = poly
     #            json_data[key][key2]['sensorwidth'] = im.size[0]
     #            json_data[key][key2]['sensorheight'] = im.size[1]
-                json_data[key][key2]['sensorwidth'] = 1080
-                json_data[key][key2]['sensorheight'] = 760
+                json_data[key][key2]['sensorwidth'] = 4912
+                json_data[key][key2]['sensorheight'] = 3680
                 json_data[key][key2]['pixel_size'] = .0014
                 json_data[key][key2]['focal_length'] = 35
             if key2 == "microcameras":
