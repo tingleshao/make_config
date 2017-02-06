@@ -65,7 +65,7 @@ def parse(opencv_out, filename):
         offsetx.append(0)
         offsety.append(9)
         k1.append(1)
-        f.append(2)
+        f.append(K[1,1] / 0.1835)
         #s.append(3)
 
     with open("reference.json") as json_file:
@@ -73,7 +73,7 @@ def parse(opencv_out, filename):
 
     poly = [[0]] * 10
     alist = [1]
-    poly.insert(0, alist)
+    poly.insert(len(poly), alist)
 
     for key in json_data.keys():
         for key2 in json_data[key]:
