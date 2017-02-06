@@ -4,8 +4,10 @@ import math
 import os
 import numpy as np
 from collections import OrderedDict
+import eulerangles
 
 
+#TODO: why it generates 22 cameras?
 def parse(opencv_out, filename):
     # takes the <opencv_out> file as a string, parse it into a JSON file,
     # and write it into file with <filename>
@@ -30,6 +32,8 @@ def parse(opencv_out, filename):
         ks.append(curr_k)
         rs.append(curr_r)
         s.append(slot_num)
+    print "Ks length: "
+    print len(ks)
 
     curr_tempstr = tempstr[-1]
     slot_num = int(curr_tempstr.split("K:")[0].split(":")[0])
@@ -58,7 +62,8 @@ def parse(opencv_out, filename):
         curr_r = rs[i]
         R = list_to_numpy_array(curr_r)
         K = list_to_numpy_array(curr_k)
-        x,y,z = rotation_matrix_to_euler_angles(R)
+        x,y,z = eulerangles.mat2euler(R)
+        #x,y,z = rotation_matrix_to_euler_angles(R)
         yaw.append(x*180.0/math.pi)
         pitch.append(y*180.0/math.pi)
         roll.append(z*180.0/math.pi)
@@ -88,10 +93,16 @@ def parse(opencv_out, filename):
                 json_data[key][key2]['pixel_size'] = .0014
                 json_data[key][key2]['focal_length'] = 35
             if key2 == "microcameras":
+                print "key2 len: "
+                print len(json_data[key][key2])
                 for i in xrange(len(json_data[key][key2])):
                     json_data[key][key2][i] = {'Slot':int(s[i]), 'Sensorcal':["1", "1", "1", "1"], 'gain':1, 'vigoffset_x':0, 'vigoffset_y':0, 'Yaw': yaw[i], 'Pitch':pitch[i], 'Roll':roll[i], 'K1':k1[i], 'OFFSET_X':offsetx[i], 'OFFSET_Y':offsety[i], 'F':float(f[i])}
-                for i in xrange(len(s)):
-                    json_data[key][key2].append({'Slot': int(s[i]), 'Sensorcal': ["1", "1", "1", "1"], 'gain': 1, 'vigoffset_x': 0, 'vigoffset_y': 0, 'Yaw': yaw[i], 'Pitch': pitch[i], 'Roll': roll[i], 'K1': k1[i], 'OFFSET_X': offsetx[i], 'OFFSET_Y': offsety[i], 'F': float(f[i])})
+                offset = len(json_data[key][key2])
+                print offset
+                for i in xrange(len(s)-len(json_data[key][key2])):
+                    print "i+offset:"
+                    print i + offset
+                    json_data[key][key2].append({'Slot': int(s[i+offset]), 'Sensorcal': ["1", "1", "1", "1"], 'gain': 1, 'vigoffset_x': 0, 'vigoffset_y': 0, 'Yaw': yaw[i+offset], 'Pitch': pitch[i+offset], 'Roll': roll[i+offset], 'K1': k1[i+offset], 'OFFSET_X': offsetx[i+offset], 'OFFSET_Y': offsety[i+offset], 'F': float(f[i+offset])})
 
     data = json.dumps(json_data, indent=4)
     with open(filename, "w") as outfile:
