@@ -64,7 +64,7 @@ def parse(opencv_out, filename):
         roll.append(z*180.0/math.pi)
         offsetx.append(0)
         offsety.append(9)
-        k1.append(1)
+        k1.append(0)
         f.append(K[1,1] / 0.1835)
         #s.append(3)
 
