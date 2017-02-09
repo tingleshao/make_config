@@ -17,15 +17,20 @@ def parse(opencv_out, filename):
 
     tempstr = data.split("Camera #")
     tempstr = tempstr[1:]
+    tempstr2 = data.split("last place: ")
+    tempstr2 = tempstr2[1:]
     ks = []
     rs = []
     s = []
     for i in xrange(len(tempstr)-1):
         curr_tempstr = tempstr[i]
+        curr_tempstr2 = tempstr2[i]
         slot_num = int(curr_tempstr.split("K:")[0].split(":")[0])
         curr_kstr = curr_tempstr.split("K:")[1].split("R:")[0]
         curr_kstr = curr_kstr.replace('\n','').replace('[','').replace(']','').replace(';',',').split(', ')
-        curr_rstr = curr_tempstr.split("K:")[1].split("R:")[1]
+        #curr_rstr = curr_tempstr.split("K:")[1].split("R:")[1]
+        #curr_rstr = curr_rstr.replace('\n','').replace('[','').replace(']','').replace(';',',').split(', ')
+        curr_rstr = curr_tempstr2.split("R:")[1].split("Multi-band blender")[0].split("Compositing")[0]
         curr_rstr = curr_rstr.replace('\n','').replace('[','').replace(']','').replace(';',',').split(', ')
         curr_k = [float(i) for i in curr_kstr]
         curr_r = [float(i) for i in curr_rstr]
@@ -36,10 +41,12 @@ def parse(opencv_out, filename):
     print len(ks)
 
     curr_tempstr = tempstr[-1]
+    curr_tempstr2 = tempstr2[-1].split("Finished")[0].split("Warping images")[0].split("Multi-band blender")[0].split("Compositing")[0]
     slot_num = int(curr_tempstr.split("K:")[0].split(":")[0])
     curr_kstr = curr_tempstr.split("K:")[1].split("R:")[0]
     curr_kstr = curr_kstr.replace('\n','').replace('[','').replace(']','').replace(';',',').split(', ')
-    curr_rstr = curr_tempstr.split("K:")[1].split("R:")[1].split('Warping images')[0]
+#    curr_rstr = curr_tempstr.split("K:")[1].split("R:")[1].split('Warping images')[0]
+    curr_rstr = curr_tempstr2.split("R:")[1]
     curr_rstr = curr_rstr.replace('\n','').replace('[','').replace(']','').replace(';',',').split(', ')
     curr_k = [float(i) for i in curr_kstr]
     curr_r = [float(i) for i in curr_rstr]
@@ -62,15 +69,29 @@ def parse(opencv_out, filename):
         curr_r = rs[i]
         R = list_to_numpy_array(curr_r)
         K = list_to_numpy_array(curr_k)
-        x,y,z = eulerangles.mat2euler(R)
-        #x,y,z = rotation_matrix_to_euler_angles(R)
-        yaw.append(x*180.0/math.pi)
-        pitch.append(y*180.0/math.pi)
+        # print out the first rotation matrix
+        if i == 0:
+            print "R: "
+            print R
+#        x,y,z = eulerangles.mat2euler(R)
+#        if i == 0:
+            #print "x, y, z:"
+            #print x * 180.0 / math.pi
+            #print y* 180.0 / math.pi
+            #print z* 180.0 / math.pi
+        if i == 0:
+            x,y,z = rotation_matrix_to_euler_angles(R, True)
+        else:
+            x,y,z = rotation_matrix_to_euler_angles(R, False)
+        print "xyz: "
+        print x, y, z
+        yaw.append(y*180.0/math.pi)
+        pitch.append(x*180.0/math.pi)
         roll.append(z*180.0/math.pi)
         offsetx.append(0)
         offsety.append(9)
         k1.append(0)
-        f.append(K[1,1] / 0.1835)
+        f.append(19500)
         #s.append(3)
 
     with open("reference.json") as json_file:
@@ -127,12 +148,21 @@ def is_rotation_matrix(R):
     return n < 1e-6
 
 
-def rotation_matrix_to_euler_angles(R):
+def rotation_matrix_to_euler_angles(R, verbose):
     # input R matrix should be numpy array    #TODO: expand the string to fill in these lists
     assert(is_rotation_matrix(R))
     sy = math.sqrt(R[0,0] * R[0,0] + R[1,0] * R[1,0])
     singular = sy < 1e-6
     if not singular:
+        if verbose:
+            print "R21:"
+            print R[2,1]
+            print R[2,2]
+            print R[2,0]
+            print R[1,0]
+            print R[0,0]
+            print R[1,2]
+            print R[1,1]
         x = math.atan2(R[2,1], R[2,2])
         y = math.atan2(-R[2,0], sy)
         z = math.atan2(R[1,0], R[0,0])
