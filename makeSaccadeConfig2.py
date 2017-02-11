@@ -7,7 +7,6 @@ from collections import OrderedDict
 import eulerangles
 
 
-#TODO: why it generates 22 cameras?
 def parse(opencv_out, filename):
     # takes the <opencv_out> file as a string, parse it into a JSON file,
     # and write it into file with <filename>
