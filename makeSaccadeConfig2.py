@@ -219,7 +219,7 @@ def rotation_matrix_to_euler_angles_yzx(R, verbose):
     singular = sy < 1e-6
     if not singular:
         x = math.atan2(-R[1,2], R[1,1])
-        y = math.atan2(-R[2,1], R[0,0])
+        y = math.atan2(-R[2,0], R[0,0])
         z = math.atan2(R[1,0],sy)
     else:
         print "singular"
