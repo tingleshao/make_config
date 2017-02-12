@@ -78,12 +78,16 @@ def parse(opencv_out, filename):
             #print x * 180.0 / math.pi
             #print y* 180.0 / math.pi
             #print z* 180.0 / math.pi
-        if i == 0:
+    #    if i == 0:
         #    x,y,z = rotation_matrix_to_euler_angles(R, True)
-            x,y,z = rotation_matrix_to_euler_angles_xyz(R, True)
-        else:
+    #    x,y,z = rotation_matrix_to_euler_angles(R, True)
+    #    x,y,z = rotation_matrix_to_euler_angles_xzy(R, True)
+    #    x,y,z = rotation_matrix_to_euler_angles_yxz(R, True)
+        x,y,z = rotation_matrix_to_euler_angles_yzx(R, True)
+
+    #    else:
         #    x,y,z = rotation_matrix_to_euler_angles(R, False)
-            x,y,z = rotation_matrix_to_euler_angles_xyz(R, True)
+    #        x,y,z = rotation_matrix_to_euler_angles_xyz(R, True)
         print "xyz: "
         print x, y, z
         yaw.append(y*180.0/math.pi)
@@ -184,6 +188,45 @@ def rotation_matrix_to_euler_angles_xyz(R, verbose):
     else:
         print "singular"
     return np.array([x,y,z])
+
+def rotation_matrix_to_euler_angles_xzy(R, verbose):
+    assert(is_rotation_matrix(R))
+    sy = math.sqrt(R[1,1] * R[1,1] + R[2,1] * R[2,1])
+    singular = sy < 1e-6
+    if not singular:
+        x = math.atan2(R[2,1], R[1,1])
+        y = math.atan2(R[0,2], R[0,0])
+        z = math.atan2(-R[0,1], sy)
+    else:
+        print "singular"
+    return np.array([x,y,z])
+
+def rotation_matrix_to_euler_angles_yxz(R, verbose):
+    assert(is_rotation_matrix(R))
+    sy = math.sqrt(R[1,0] * R[1,0] + R[1,1] * R[1,1])
+    singular = sy < 1e-6
+    if not singular:
+        x = math.atan2(-R[1,2], sy)
+        y = math.atan2(R[0,2], R[2,2])
+        z = math.atan2(R[1,0], R[1,1])
+    else:
+        print "singular"
+    return np.array([x,y,z])
+
+def rotation_matrix_to_euler_angles_yzx(R, verbose):
+    assert(is_rotation_matrix(R))
+    sy = math.sqrt(R[1,1] * R[1,1] + R[1,2] * R[1,2])
+    singular = sy < 1e-6
+    if not singular:
+        x = math.atan2(-R[1,2], R[1,1])
+        y = math.atan2(-R[2,1], R[0,0])
+        z = math.atan2(R[1,0],sy)
+    else:
+        print "singular"
+    return np.array([x,y,z])
+
+def rotation_matrix_to_euler_angles_zxy(R, verbose):
+    return None
 
 
 if __name__ == "__main__":
