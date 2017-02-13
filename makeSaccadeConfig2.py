@@ -83,7 +83,8 @@ def parse(opencv_out, filename):
     #    x,y,z = rotation_matrix_to_euler_angles(R, True)
     #    x,y,z = rotation_matrix_to_euler_angles_xzy(R, True)
     #    x,y,z = rotation_matrix_to_euler_angles_yxz(R, True)
-        x,y,z = rotation_matrix_to_euler_angles_yzx(R, True)
+    #    x,y,z = rotation_matrix_to_euler_angles_yzx(R, True)
+        x,y,z = rotation_matrix_to_euler_angles_zxy(R, True)
 
     #    else:
         #    x,y,z = rotation_matrix_to_euler_angles(R, False)
@@ -226,7 +227,16 @@ def rotation_matrix_to_euler_angles_yzx(R, verbose):
     return np.array([x,y,z])
 
 def rotation_matrix_to_euler_angles_zxy(R, verbose):
-    return None
+    assert(is_rotation_matrix(R))
+    sy = math.sqrt(R[2,0] * R[2,0] + R[2,2] * R[2,2])
+    singular = sy < 1e-6
+    if not singular:
+        x = math.atan2(R[2,1],sy)
+        y = math.atan2(-R[2,0], R[2,2])
+        z = math.atan2(-R[0,1], R[1,1])
+    else:
+        print "singular"
+    return np.array([x,y,z])
 
 
 if __name__ == "__main__":
