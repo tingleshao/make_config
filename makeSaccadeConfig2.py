@@ -7,6 +7,7 @@ from collections import OrderedDict
 import eulerangles
 
 
+# TODO: convert the corner information as translation, may help...
 def parse(opencv_out, filename):
     # takes the <opencv_out> file as a string, parse it into a JSON file,
     # and write it into file with <filename>
@@ -16,7 +17,8 @@ def parse(opencv_out, filename):
 
     tempstr = data.split("Camera #")
     tempstr = tempstr[1:]
-    tempstr2 = data.split("last place: ")
+    #tempstr2 = data.split("last place: ")
+    tempstr2 = data.split("Camera R after waveCorrect: ")
     tempstr2 = tempstr2[1:]
     ks = []
     rs = []
